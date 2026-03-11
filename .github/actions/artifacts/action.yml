@@ -34,7 +34,7 @@ runs:
             cp LICENSE $OUTDIR/.
           fi
 
-          echo "ARTIFACT_PATH='${{ inputs.artifacts }}/*'" >> $GITHUB_ENV 
+          echo "ARTIFACT_PATH=${{ inputs.artifacts }}/*" >> $GITHUB_ENV 
         
       - shell: bash
         if: ${{ inputs.compress == 'zip' }}
@@ -42,7 +42,7 @@ runs:
           pushd ${{ inputs.artifacts }}
           zip -r ${{ inputs.name }}.zip ./*
           popd
-          echo "ARTIFACT_PATH='${{ inputs.artifacts }}/${{ inputs.name }}.zip'" >> $GITHUB_ENV 
+          echo "ARTIFACT_PATH=${{ inputs.artifacts }}/${{ inputs.name }}.zip" >> $GITHUB_ENV 
         
       - shell: bash
         if: ${{ inputs.compress == 'tgz' }}
@@ -50,7 +50,7 @@ runs:
           pushd ${{ inputs.artifacts }}
           tar -czvf ${{ inputs.name }}.tgz ./*
           popd
-          echo "ARTIFACT_PATH='${{ inputs.artifacts }}/${{ inputs.name }}.tgz'" >> $GITHUB_ENV 
+          echo "ARTIFACT_PATH=${{ inputs.artifacts }}/${{ inputs.name }}.tgz" >> $GITHUB_ENV 
         
       - uses: actions/upload-artifact@v4
         with:
