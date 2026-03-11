@@ -1,9 +1,9 @@
-name: Publish dry run
+name: Publish
 
 on:
   push:
     tags:
-      - 'v[0-9]+.[0-9]+.[0-9]+-[0-9A-Za-z-]+'
+      - 'v[0-9]+.[0-9]+.[0-9]+'
   
 jobs:
   publish-dry:

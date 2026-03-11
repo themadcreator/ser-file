@@ -8,7 +8,8 @@ env:
 on:
   push:
     tags:
-      - 'v[0-9]+.[0-9]+.[0-9]+(-[0-9A-Za-z-]+)?'
+      - 'v[0-9]+.[0-9]+.[0-9]+-[0-9A-Za-z]+'
+      - 'v[0-9]+.[0-9]+.[0-9]+'
 
 jobs:
   build-nix:
@@ -41,7 +42,8 @@ jobs:
       - uses: actions-rust-lang/setup-rust-toolchain@v1
       - id: example-xwin
         uses: ./.github/actions/xwin.yml
-        targets-ext: '--examples'
+        with:
+          targets-ext: '--examples'
       - id: example-artifacts-win
         uses: ./.github/actions/artifacts.yml
         with:

@@ -1,10 +1,10 @@
-name: 'Cargo xwin'
-description: 'Build with cargo xwin'
+name: Cargo xwin
+description: Build with cargo xwin
 inputs:
   targets-ext:
-    description: 'Additional targets'
+    description: Additional targets
 runs:
-  using: 'composite'
+  using: composite
   steps:
       - run: cargo install cargo-xwin
       - run: cargo xwin cache xwin

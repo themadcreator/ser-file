@@ -1,21 +1,21 @@
-name: 'Upload Artifacts'
-description: 'Upload Crate Examples as Artifacts'
+name: Upload Artifacts
+description: Upload Crate Examples as Artifacts
 inputs:
   name:
-    description: 'Name of the artifact'
+    description: Name of the artifact
     required: true
   target:
-    description: 'Cargo build target'
+    description: Cargo build target
     required: true
   file_regex:
-    description: 'Regular expression to match artifact files in the build directory'
+    description: Regular expression to match artifact files in the build directory
     required: true
   artifacts:
-    description: 'Temporary artifacts path'
+    description: Temporary artifacts path
     required: true
     default: 'target/artifacts'
 runs:
-  using: 'composite'
+  using: composite
   steps:
       - run: mkdir -p ${{ input.artifacts }}
       - run: find target/${{ input.target }}/release/ -type f -regextype posix-extended -regex '${{ input.file_regex }}' -exec cp {} ${{ input.artifacts }}/. \;

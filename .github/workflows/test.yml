@@ -1,4 +1,5 @@
-name: "Test Suite"
+name: Test Suite
+
 on:
   push:
   pull_request:
