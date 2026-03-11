@@ -52,10 +52,10 @@ jobs:
           file_regex: ${{ env.ARTIFACTS_WIN }}
 
   release:
-    needs: |
-      build-nix
-      build-win
-      
+    needs:
+      - build-nix
+      - build-win
+
     runs-on: ubuntu-latest
 
     permissions:
