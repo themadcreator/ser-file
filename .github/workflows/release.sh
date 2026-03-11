@@ -10,15 +10,15 @@ if [ -n "$(git status --porcelain)" ]; then
     exit 1
 fi
 
-# cargo set-version $VER
-# git add Cargo.toml Cargo.lock
-# git commit -m "Bump version ${VER}"
+cargo set-version $VER
+git add Cargo.toml Cargo.lock
+git commit -m "Bump version ${VER}"
 
-# # VER=$(cargo metadata --no-deps --format-version=1 | jq -r '.packages[0].version')
+# VER=$(cargo metadata --no-deps --format-version=1 | jq -r '.packages[0].version')
 
-# echo "Releasing version ${VER}"
-# echo "Press [ENTER] when ready..."
-# read  -n 1 
+echo "Releasing version ${VER}"
+echo "Press [ENTER] when ready..."
+read  -n 1 
 
-# git tag -a "v${VER}" -m "Release version ${VER}"
-# git push origin --tags
+git tag -a "v${VER}" -m "Release version ${VER}"
+git push origin --tags
