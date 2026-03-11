@@ -25,6 +25,9 @@ jobs:
     steps:
       - uses: actions/checkout@v5
       - uses: actions-rust-lang/setup-rust-toolchain@v1
+        with:
+          toolchain: stable
+          target: ${{ matrix.target }}
       - run: cargo build --release --examples --target ${{ matrix.target }}
       - id: example-artifacts-nix
         uses: ./.github/actions/artifacts/
@@ -40,6 +43,9 @@ jobs:
     steps:
       - uses: actions/checkout@v5
       - uses: actions-rust-lang/setup-rust-toolchain@v1
+        with:
+          toolchain: stable
+          target: x86_64-pc-windows-msvc
       - id: example-xwin
         uses: ./.github/actions/xwin/
         with:
