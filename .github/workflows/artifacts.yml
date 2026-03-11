@@ -12,14 +12,17 @@ on:
       - 'v[0-9]+.[0-9]+.[0-9]+'
 
 jobs:
-  check-release:
+  check-prerelease:
     runs-on: ubuntu-latest
+    outputs:
+      is_prerelease: ${{ steps.check.outputs.is_prerelease }}
     steps:
-      - run: |
+      - id: check
+        run: |
           if [[ "${{ github.ref_name }}" == *-* ]]; then
-            echo "IS_PRERELEASE=true" >> $GITHUB_ENV
+            echo "is_prerelease=true" >> $GITHUB_OUTPUT
           else
-            echo "IS_PRERELEASE=false" >> $GITHUB_ENV
+            echo "is_prerelease=false" >> $GITHUB_OUTPUT
           fi
 
   build-nix:
@@ -65,7 +68,7 @@ jobs:
 
   release:
     needs:
-      - check-release
+      - check-prerelease
       - build-nix
       - build-win
 
@@ -81,7 +84,7 @@ jobs:
           path: release_artifacts/
       - uses: softprops/action-gh-release@v2
         with:
-          prerelease: ${{ env.IS_PRERELEASE == 'true' }}
+          prerelease: ${{ needs.check-prerelease.is_prerelease == 'true' }}
           files: |
             LICENSE
             release_artifacts/**/*
