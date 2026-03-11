@@ -14,14 +14,32 @@ inputs:
     description: Temporary artifacts path
     required: true
     default: 'target/artifacts'
+  compress:
+    description: Specify 'zip' or 'tgz' to compress artifacts into single file
 runs:
   using: composite
   steps:
-      - run: mkdir -p ${{ inputs.artifacts }}
-        shell: bash
-      - run: find target/${{ inputs.target }}/release/ -type f -regextype posix-extended -regex '${{ inputs.file_regex }}' -exec cp {} ${{ inputs.artifacts }}/. \;
-        shell: bash
+      - shell: bash
+        run: |
+          mkdir -p ${{ inputs.artifacts }}
+          find target/${{ inputs.target }}/release/ -type f -regextype posix-extended -regex '${{ inputs.file_regex }}' -exec cp {} ${{ inputs.artifacts }}/. \;
+          echo "ARTIFACT_PATH='${{ inputs.artifacts }}/*'" >> $GITHUB_ENV 
+        
+      - shell: bash
+        if: ${{ inputs.compress == 'zip' }}
+        run: |
+          COMPRESSED="${{ inputs.artifacts }}/${{ inputs.name }}.zip"
+          zip -r $COMPRESSED ${{ inputs.artifacts }}/*
+          echo "ARTIFACT_PATH=$COMPRESSED" >> $GITHUB_ENV 
+        
+      - shell: bash
+        if: ${{ inputs.compress == 'tgz' }}
+        run: |
+          COMPRESSED="${{ inputs.artifacts }}/${{ inputs.name }}.tgz"
+          tar -czvf $COMPRESSED ${{ inputs.artifacts }}/*
+          echo "ARTIFACT_PATH=$COMPRESSED" >> $GITHUB_ENV 
+        
       - uses: actions/upload-artifact@v4
         with:
           name: ${{ inputs.name }}
-          path: ${{ inputs.artifacts }}/*
+          path: ${{ env.ARTIFACT_PATH }}
