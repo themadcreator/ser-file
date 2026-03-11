@@ -14,11 +14,10 @@ cargo set-version $VER
 git add Cargo.toml Cargo.lock
 git commit -m "Bump version ${VER}"
 
-# VER=$(cargo metadata --no-deps --format-version=1 | jq -r '.packages[0].version')
-
 echo "Releasing version ${VER}"
 echo "Press [ENTER] when ready..."
-read  -n 1 
+read  -n 1
 
+git push
 git tag -a "v${VER}" -m "Release version ${VER}"
 git push origin --tags
