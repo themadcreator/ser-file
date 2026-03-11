@@ -22,22 +22,35 @@ runs:
       - shell: bash
         run: |
           mkdir -p ${{ inputs.artifacts }}
-          find target/${{ inputs.target }}/release/ -type f -regextype posix-extended -regex '${{ inputs.file_regex }}' -exec cp {} ${{ inputs.artifacts }}/. \;
+          OUTDIR=$(realpath ${{ inputs.artifacts }})
+
+          echo "Collect built artifacts"
+          pushd target/${{ inputs.target }}/release
+          find . -type f -regextype posix-extended -regex '${{ inputs.file_regex }}' -exec cp {} ${OUTDIR}/. \;
+          popd
+
+          echo "Collect LICENSE if available"
+          if [ -e LICENSE ]; then
+            cp LICENSE $OUTDIR/.
+          fi
+
           echo "ARTIFACT_PATH='${{ inputs.artifacts }}/*'" >> $GITHUB_ENV 
         
       - shell: bash
         if: ${{ inputs.compress == 'zip' }}
         run: |
-          COMPRESSED="${{ inputs.artifacts }}/${{ inputs.name }}.zip"
-          zip -r $COMPRESSED ${{ inputs.artifacts }}/*
-          echo "ARTIFACT_PATH=$COMPRESSED" >> $GITHUB_ENV 
+          pushd ${{ inputs.artifacts }}
+          zip -r ${{ inputs.name }}.zip ./*
+          popd
+          echo "ARTIFACT_PATH='${{ inputs.artifacts }}/${{ inputs.name }}.zip'" >> $GITHUB_ENV 
         
       - shell: bash
         if: ${{ inputs.compress == 'tgz' }}
         run: |
-          COMPRESSED="${{ inputs.artifacts }}/${{ inputs.name }}.tgz"
-          tar -czvf $COMPRESSED ${{ inputs.artifacts }}/*
-          echo "ARTIFACT_PATH=$COMPRESSED" >> $GITHUB_ENV 
+          pushd ${{ inputs.artifacts }}
+          tar -czvf ${{ inputs.name }}.tgz ./*
+          popd
+          echo "ARTIFACT_PATH='${{ inputs.artifacts }}/${{ inputs.name }}.tgz'" >> $GITHUB_ENV 
         
       - uses: actions/upload-artifact@v4
         with:
