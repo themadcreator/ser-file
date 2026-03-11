@@ -5,8 +5,10 @@ inputs:
     description: Additional targets
 runs:
   using: composite
-  shell: bash
   steps:
       - run: cargo install cargo-xwin
+        shell: bash
       - run: cargo xwin cache xwin
-      - run: cargo xwin build --release ${{ input.targets-ext }} --target x86_64-pc-windows-msvc
+        shell: bash
+      - run: cargo xwin build --release ${{ inputs.targets-ext }} --target x86_64-pc-windows-msvc
+        shell: bash

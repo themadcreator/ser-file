@@ -16,11 +16,12 @@ inputs:
     default: 'target/artifacts'
 runs:
   using: composite
-  shell: bash
   steps:
-      - run: mkdir -p ${{ input.artifacts }}
-      - run: find target/${{ input.target }}/release/ -type f -regextype posix-extended -regex '${{ input.file_regex }}' -exec cp {} ${{ input.artifacts }}/. \;
+      - run: mkdir -p ${{ inputs.artifacts }}
+        shell: bash
+      - run: find target/${{ inputs.target }}/release/ -type f -regextype posix-extended -regex '${{ inputs.file_regex }}' -exec cp {} ${{ inputs.artifacts }}/. \;
+        shell: bash
       - uses: actions/upload-artifact@v4
         with:
-          name: ${{ input.name }}-${{ input.target }}
-          path: ${{ input.artifacts }}/*
+          name: ${{ inputs.name }}-${{ inputs.target }}
+          path: ${{ inputs.artifacts }}/*
