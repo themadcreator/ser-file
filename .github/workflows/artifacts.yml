@@ -2,8 +2,8 @@ name: Cross-Platform Build and Release Artifacts
 
 env:
   PACKAGE_NAME: 'ser-file'
-  ARTIFACTS_NIX: 'examples/ser'
-  ARTIFACTS_WIN: 'examples/(ser.exe|ser.pdb)'
+  ARTIFACTS_NIX: './examples/ser'
+  ARTIFACTS_WIN: './examples/(ser.exe|ser.pdb)'
 
 on:
   push:
