@@ -20,38 +20,32 @@ jobs:
         include:
           - target: x86_64-unknown-linux-gnu
           - target: aarch64-unknown-linux-gnu
-          # - target: x86_64-apple-darwin # skip for now
+          - target: x86_64-apple-darwin
+          - target: aarch64-apple-darwin
 
     steps:
       - uses: actions/checkout@v5
-      - uses: actions-rust-lang/setup-rust-toolchain@v1
+      - uses: zijiren233/cargo-cross@v1
         with:
-          toolchain: stable
-          target: ${{ matrix.target }}
-      - run: cargo build --release --examples --target ${{ matrix.target }}
-      - id: example-artifacts-nix
-        uses: ./.github/actions/artifacts/
+          command: build --all-targets
+          profile: release
+          targets: ${{ matrix.target }}
+      - uses: ./.github/actions/artifacts/
         with:
           name: ${{ env.PACKAGE_NAME }}-${{ github.ref_name }}
           target: ${{ matrix.target }}
           file_regex: ${{ env.ARTIFACTS_NIX }}
-
 
   build-win:
     runs-on: ubuntu-latest
 
     steps:
       - uses: actions/checkout@v5
-      - uses: actions-rust-lang/setup-rust-toolchain@v1
+      - uses: ./.github/actions/xwin/
         with:
-          toolchain: stable
-          target: x86_64-pc-windows-msvc
-      - id: example-xwin
-        uses: ./.github/actions/xwin/
-        with:
-          targets-ext: '--examples'
-      - id: example-artifacts-win
-        uses: ./.github/actions/artifacts/
+          command: build --all-targets
+          profile: release
+      - uses: ./.github/actions/artifacts/
         with:
           name: ${{ env.PACKAGE_NAME }}-${{ github.ref_name }}
           target: x86_64-pc-windows-msvc

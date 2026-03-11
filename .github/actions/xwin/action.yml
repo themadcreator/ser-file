@@ -1,14 +1,22 @@
 name: Cargo xwin
 description: Build with cargo xwin
 inputs:
-  targets-ext:
-    description: Additional targets
+  command:
+    description: Command
+    default: build
+  profile:
+    description: Build profile
+    default: release
 runs:
   using: composite
   steps:
+      - uses: actions-rust-lang/setup-rust-toolchain@v1
+        with:
+          toolchain: stable
+          target: x86_64-pc-windows-msvc
       - run: cargo install cargo-xwin
         shell: bash
       - run: cargo xwin cache xwin
         shell: bash
-      - run: cargo xwin build --release ${{ inputs.targets-ext }} --target x86_64-pc-windows-msvc
+      - run: cargo xwin ${{ inputs.command }} --${{ inputs.profile }} --target x86_64-pc-windows-msvc
         shell: bash
