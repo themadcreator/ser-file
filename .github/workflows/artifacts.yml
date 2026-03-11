@@ -84,9 +84,7 @@ jobs:
           path: release_artifacts/
       - uses: softprops/action-gh-release@v2
         with:
-          prerelease: ${{ needs.check-prerelease.is_prerelease == 'true' }}
-          files: |
-            LICENSE
-            release_artifacts/**/*
+          prerelease: ${{ needs.check-prerelease.outputs.is_prerelease == 'true' }}
+          files: release_artifacts/**/*
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

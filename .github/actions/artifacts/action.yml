@@ -24,13 +24,13 @@ runs:
           mkdir -p ${{ inputs.artifacts }}
           OUTDIR=$(realpath ${{ inputs.artifacts }})
 
-          echo "Collect built artifacts"
+          echo "Collect built artifact into $OUTDIR"
           pushd target/${{ inputs.target }}/release
-          find . -type f -regextype posix-extended -regex '${{ inputs.file_regex }}' -exec cp {} ${OUTDIR}/. \;
+          find . -type f -regextype posix-extended -regex '${{ inputs.file_regex }}' -exec cp {} $OUTDIR/. \;
           popd
 
-          echo "Collect LICENSE if available"
           if [ -e LICENSE ]; then
+            echo "Collect LICENSE"
             cp LICENSE $OUTDIR/.
           fi
 
