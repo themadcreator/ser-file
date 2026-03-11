@@ -23,5 +23,5 @@ runs:
         shell: bash
       - uses: actions/upload-artifact@v4
         with:
-          name: ${{ inputs.name }}-${{ inputs.target }}
+          name: ${{ inputs.name }}
           path: ${{ inputs.artifacts }}/*
