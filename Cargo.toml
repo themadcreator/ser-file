@@ -1,6 +1,6 @@
 [package]
 name = "ser-file"
-version = "0.1.0"
+version = "0.1.0-pre10"
 edition = "2024"
 authors = ["themadcreator@github"]
 description = "Read, write, export, create SER files"
