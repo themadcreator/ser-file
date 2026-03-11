@@ -1,0 +1,51 @@
+name: Cross-Platform Build and Release Artifacts
+
+env:
+  PACKAGE_NAME: 'ser-file'
+  ARTIFACTS_NIX: 'examples/ser'
+  ARTIFACTS_WIN: 'examples/(ser.exe|ser.pdb)'
+
+on:
+  push:
+    tags:
+      - 'v[0-9]+.[0-9]+.[0-9]+(-[0-9A-Za-z-]+)?'
+
+jobs:
+  build-nix:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        include:
+          - target: x86_64-unknown-linux-gnu
+          - target: aarch64-unknown-linux-gnu
+          - target: x86_64-apple-darwin
+
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions-rust-lang/setup-rust-toolchain@v1
+      - run: cargo build --release --examples --target ${{ matrix.target }}
+      - id: example-artifacts-nix
+        uses: ./.github/actions/artifacts.yml
+        with:
+          name: ${{ env.PACKAGE_NAME }}-${{ github.ref_name }}
+          target: ${{ matrix.target }}
+          file_regex: ${{ env.ARTIFACTS_NIX }}
+
+
+  build-win:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions-rust-lang/setup-rust-toolchain@v1
+      - id: example-xwin
+        uses: ./.github/actions/xwin.yml
+        targets-ext: '--examples'
+      - id: example-artifacts-win
+        uses: ./.github/actions/artifacts.yml
+        with:
+          name: ${{ env.PACKAGE_NAME }}-${{ github.ref_name }}
+          target: x86_64-pc-windows-msvc
+          file_regex: ${{ env.ARTIFACTS_WIN }}
+        

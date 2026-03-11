@@ -1,7 +1,13 @@
 [package]
 name = "ser-file"
-version = "0.1.0"
+version = "0.1.0-pre"
 edition = "2024"
+authors = ["themadcreator@github"]
+description = "Read, write, export, create SER files"
+repository = "https://github.com/themadcreator/ser-file"
+license = "MIT"
+keywords = ["astronomy", "photography"]
+categories = []
 
 [lib]
 name = "ser_file"
@@ -14,6 +20,7 @@ path = "examples/cli.rs"
 [dependencies]
 binrw = "0.15.1"
 chrono = "0.4.44"
+getset = "0.1.6"
 image = "0.25.9"
 
 [dev-dependencies]

@@ -8,7 +8,7 @@ use std::{
     path::PathBuf,
 };
 
-use ser_file::{FrameFormat, Ser, Timestamp};
+use ser_file::{FrameFormat, Ser};
 
 /// Read and write SER files
 #[derive(Parser)]
@@ -98,17 +98,17 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
             let format = ser.frame_format();
             println!("Frame Format:");
-            println!("\tColor:  {:?}", ser.color_id());
-            println!("\tDepth:  {:?}", ser.pixel_depth_per_plane());
+            println!("\tColor:  {:?}", format.color());
+            println!("\tDepth:  {:?}", format.depth());
             println!("\tWidth:  {}", format.width());
             println!("\tHeight: {}", format.height());
 
             println!("Frame Count: {}", ser.frame_count());
 
-            if ser.has_timestamp_trailer() {
+            if ser.has_frame_timestamps() {
                 println!("Frame Timestamps:");
-                for (i, t) in ser.iter_trailer().enumerate() {
-                    println!("\t{}:  {}", i, t);
+                for (i, (_f, t)) in ser.iter().enumerate() {
+                    println!("\t{}:  {}", i, t.unwrap());
                 }
             }
         }
@@ -132,9 +132,10 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             let first = images.iter().next().unwrap();
             let format: FrameFormat = first.try_into()?;
 
-            let mut ser = Ser::new(format.clone());
+            let mut ser = Ser::with_format(format);
+            let mut frames = ser.frames_mut();
             for img in images {
-                ser.add_frame(format.try_new_frame(img)?, None);
+                frames.try_push(frames.format().try_into_frame(img)?, None)?;
             }
 
             let mut out_file = BufWriter::new(File::create(cmd.out)?);
@@ -151,21 +152,17 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             let mut file = File::open(&input_path)?;
             let ser = Ser::read(&mut file)?;
 
-            let timestamps: Vec<&Timestamp> = ser.iter_trailer().collect();
-
-            for (i, frame) in ser.iter_frames().enumerate() {
+            for (i, (frame, timestamp)) in ser.iter().enumerate() {
                 let img: DynamicImage = frame.clone().try_into()?;
 
                 let filename: PathBuf = format!("{}_{:03}.{}", stem, i, cmd.ext).into();
                 println!("Writing {:?}", &filename);
                 img.save(&filename)?;
 
-                if cmd.timestamp && ser.has_timestamp_trailer() {
-                    if let Some(&ts) = timestamps.get(i) {
-                        let file = File::open(&filename)?;
-                        let times = FileTimes::new().set_modified(ts.try_into()?);
-                        file.set_times(times)?;
-                    }
+                if let Some(ts) = timestamp && cmd.timestamp {
+                    let file = File::open(&filename)?;
+                    let times = FileTimes::new().set_modified(ts.try_into()?);
+                    file.set_times(times)?;
                 }
             }
         }

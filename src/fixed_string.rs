@@ -1,6 +1,22 @@
 use binrw::{BinRead, BinResult, BinWrite};
 
-pub struct FixedString<const N: usize>(pub(crate) [u8; N]);
+/// A fixed-width array of bytes representing an ASCII string.
+/// 
+/// The bytes default to all zeros, but this string may not necessarily
+/// terminate with a [`'\0'`] if all bytes are used.
+pub struct FixedString<const N: usize>([u8; N]);
+
+impl<const N: usize> FixedString<N> {
+    pub fn new(bytes: [u8; N]) -> Self {
+        Self(bytes)
+    }
+}
+
+impl<const N: usize> Default for FixedString<N> {
+    fn default() -> Self {
+        Self([0u8; N])
+    }
+}
 
 impl<const N: usize> std::fmt::Display for FixedString<N> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {

@@ -1,0 +1,11 @@
+name: 'Cargo xwin'
+description: 'Build with cargo xwin'
+inputs:
+  targets-ext:
+    description: 'Additional targets'
+runs:
+  using: 'composite'
+  steps:
+      - run: cargo install cargo-xwin
+      - run: cargo xwin cache xwin
+      - run: cargo xwin build --release ${{ input.targets-ext }} --target x86_64-pc-windows-msvc

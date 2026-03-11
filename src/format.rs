@@ -1,14 +1,10 @@
 use binrw::{BinRead, BinResult, BinWrite, VecArgs, binrw};
+use getset::{Getters, Setters};
 use image::{DynamicImage, GenericImageView, ImageBuffer};
 
-use crate::ColorId;
+use crate::{ColorId, PixelEndian};
 
-#[derive(Debug, Clone)]
-pub enum PixelChannels {
-    Rgb,
-    Luma,
-}
-
+/// Describes the primitive type in which each pixel channel is stored.
 #[binrw]
 #[br(map(i32::into))]
 #[bw(map(i32::from))]
@@ -18,6 +14,7 @@ pub enum PixelDepth {
     U16(i32),
 }
 
+/// Container for different pixel formats
 #[derive(Clone)]
 pub enum Pixels {
     Rgb8(Vec<u8>),
@@ -26,28 +23,53 @@ pub enum Pixels {
     Luma16(Vec<u16>),
 }
 
+/// A tuple struct containing the dimensions of an image and its pixels
 #[derive(Clone)]
 pub struct Frame((u32, u32), Pixels);
 
-#[derive(Clone)]
+/// The format defining all images in a SER file.
+/// 
+/// Only one format per SER file is supported. All images must have the same
+/// width, height, bytes per pixel, etc.
+/// 
+/// Once a format is defined, SER frames may be converted to/from
+/// [image::DynamicImage]s. Furthermore, a [FrameFormat] may be computed from an
+/// existing [DynamicImage] using [TryFrom].
+#[derive(Clone, Getters, Setters)]
+#[getset(get = "pub", set = "pub")]
 pub struct FrameFormat {
-    pub(crate) color: ColorId,
-    pub(crate) depth: PixelDepth,
-    pub(crate) width: u32,
-    pub(crate) height: u32,
+    color: ColorId,
+    depth: PixelDepth,
+    endian: PixelEndian,
+    width: u32,
+    height: u32,
+}
+
+#[derive(Debug, Clone)]
+enum PixelChannels {
+    Rgb,
+    Luma,
 }
 
 impl FrameFormat {
-    pub fn new(color: ColorId, depth: PixelDepth, width: u32, height: u32) -> Self {
+    pub fn new(color: ColorId, depth: PixelDepth, endian: PixelEndian, width: u32, height: u32) -> Self {
         Self {
             color,
             depth,
+            endian,
             width,
             height,
         }
     }
 
-    pub fn try_new_frame(&self, img: DynamicImage) -> Result<Frame, &'static str> {
+    pub fn raw_len(&self) -> usize {
+        let channels: PixelChannels = (&self.color).into();
+        channels.len() * self.width as usize * self.height as usize
+    }
+
+    /// Attempt to convert a [DynamicImage] into a [Frame] that is compatible
+    /// with this [FrameFormat].
+    pub fn try_into_frame(&self, img: DynamicImage) -> Result<Frame, &'static str> {
         if img.width() != self.width || img.height() != self.height {
             return Err(
                 "Incompatible image dimensions. All frames must have the same width and height.",
@@ -62,14 +84,6 @@ impl FrameFormat {
         };
         Ok(Frame((self.width, self.height), pixels))
     }
-
-    pub fn width(&self) -> u32 {
-        self.width
-    }
-
-    pub fn height(&self) -> u32 {
-        self.height
-    }
 }
 
 impl PixelChannels {
@@ -77,6 +91,17 @@ impl PixelChannels {
         match self {
             PixelChannels::Rgb => 3,
             PixelChannels::Luma => 1,
+        }
+    }
+}
+
+impl Pixels {
+    fn len(&self) -> usize {
+        match self {
+            Pixels::Rgb8(items) => items.len(),
+            Pixels::Rgb16(items) => items.len(),
+            Pixels::Luma8(items) => items.len(),
+            Pixels::Luma16(items) => items.len(),
         }
     }
 }
@@ -90,24 +115,28 @@ impl TryFrom<&DynamicImage> for FrameFormat {
             DynamicImage::ImageRgb8(_) => Ok(FrameFormat::new(
                 ColorId::RGB,
                 PixelDepth::U8(8),
+                PixelEndian::host_endian(),
                 width,
                 height,
             )),
             DynamicImage::ImageRgb16(_) => Ok(FrameFormat::new(
                 ColorId::RGB,
                 PixelDepth::U16(16),
+                PixelEndian::host_endian(),
                 width,
                 height,
             )),
             DynamicImage::ImageLuma8(_) => Ok(FrameFormat::new(
                 ColorId::MONO,
                 PixelDepth::U8(8),
+                PixelEndian::host_endian(),
                 width,
                 height,
             )),
             DynamicImage::ImageLuma16(_) => Ok(FrameFormat::new(
                 ColorId::MONO,
                 PixelDepth::U16(16),
+                PixelEndian::host_endian(),
                 width,
                 height,
             )),
@@ -201,15 +230,6 @@ impl From<&ColorId> for PixelChannels {
     }
 }
 
-impl From<&PixelChannels> for ColorId {
-    fn from(value: &PixelChannels) -> Self {
-        match value {
-            PixelChannels::Rgb => ColorId::RGB,
-            PixelChannels::Luma => ColorId::MONO,
-        }
-    }
-}
-
 impl From<i32> for PixelDepth {
     fn from(value: i32) -> Self {
         match value {
@@ -224,6 +244,24 @@ impl From<&PixelDepth> for i32 {
         match value {
             PixelDepth::U8(v) => *v,
             PixelDepth::U16(v) => *v,
+        }
+    }
+}
+
+impl PartialEq<Frame> for FrameFormat {
+    fn eq(&self, frame: &Frame) -> bool {
+        let Frame((w, h), p) = frame;
+        &self.width == w && &self.height == h && self.raw_len() == p.len() && p == self.depth
+    }
+}
+
+impl PartialEq<PixelDepth> for &Pixels {
+    fn eq(&self, depth: &PixelDepth) -> bool {
+        match self {
+            Pixels::Rgb8(_) => matches!(depth, PixelDepth::U8(_)),
+            Pixels::Rgb16(_) => matches!(depth, PixelDepth::U16(_)),
+            Pixels::Luma8(_) => matches!(depth, PixelDepth::U8(_)),
+            Pixels::Luma16(_) => matches!(depth, PixelDepth::U16(_)),
         }
     }
 }

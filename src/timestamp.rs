@@ -2,6 +2,10 @@ use binrw::binrw;
 use chrono::{NaiveDate, NaiveDateTime, TimeDelta};
 use std::{ops::AddAssign, time::Duration};
 
+/// An integer representing the number of 100 nanosecond periods from the Common
+/// Era epoch Jan 1, 0001.
+/// 
+/// A value of `0` indicates an "invalid" or "unused" timestamp.
 #[binrw]
 #[br(map(u64::into))]
 #[bw(map(u64::from))]
