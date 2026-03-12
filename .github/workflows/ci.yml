@@ -23,6 +23,7 @@ jobs:
     outputs:
       ref_type: ${{ steps.parse.outputs.ref_type }}
     steps:
+      - uses: actions/checkout@v5
       - id: parse
         uses: ./.github/actions/ref_type/
 
