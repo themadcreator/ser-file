@@ -26,6 +26,7 @@ jobs:
       - uses: actions/checkout@v5
       - id: parse
         uses: ./.github/actions/ref_type/
+      - run: echo "This ref is type ${{ steps.parse.outputs.ref_type }}"
 
 
   test:
