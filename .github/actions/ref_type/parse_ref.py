@@ -24,11 +24,12 @@ def get_ref_type(ref):
             return "tag"
 
     return "unknown"
-    
+
 
 if __name__ == "__main__":
     ref_type = get_ref_type(sys.argv[1])
     print("ref_type={}".format(ref_type))
+    print("ref_type={}".format(ref_type), file=sys.stderr)
 
 
 # # PR
