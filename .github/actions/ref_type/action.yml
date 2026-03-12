@@ -15,6 +15,5 @@ runs:
   steps:
       - name: Parse
         id: parse
-        env:
-          REF: ${{ github.ref }}
-        shell: python parse_ref.py
+        shell: bash
+        run: python parse_ref.py ${{ github.ref }} >> $GITHUB_OUTPUT

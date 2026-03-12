@@ -4,15 +4,15 @@ import sys
 
 
 def get_ref_type(ref):
-    match = re.search(r"^refs/pull/([0-9]+)/merge$", ref):
+    match = re.search(r"^refs/pull/([0-9]+)/merge$", ref)
     if match:
         return "pr"
     
-    match = re.search(r"^refs/heads/(.+)$", ref):
+    match = re.search(r"^refs/heads/(.+)$", ref)
     if match:
         return "branch"
 
-    match = re.search(r"^refs/tags/(.+)$", ref):
+    match = re.search(r"^refs/tags/(.+)$", ref)
     if match:
         sv_match = re.search(r"^v(?P<major>0|[1-9]\d*)\.(?P<minor>0|[1-9]\d*)\.(?P<patch>0|[1-9]\d*)(?:-(?P<prerelease>(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+(?P<buildmetadata>[0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?$", match.group(1))
         if sv_match:
@@ -24,21 +24,11 @@ def get_ref_type(ref):
             return "tag"
 
     return "unknown"
+    
 
 if __name__ == "__main__":
-    ref = os.getenv("REF")
-    if not ref:
-        print("Need $REF environment variable")
-        sys.exit(1)
-
-    github_output = os.getenv("GITHUB_OUTPUT")
-    if not ref:
-        print("Need $GITHUB_OUTPUT environment variable")
-        sys.exit(1)
-        
-    ref_type = get_ref_type(ref)
-    with open(github_output, "a") as output_file:
-        output_file.write(f"ref_type={ref_type}\n")
+    ref_type = get_ref_type(sys.argv[1])
+    print("ref_type={}".format(ref_type))
 
 
 # # PR
