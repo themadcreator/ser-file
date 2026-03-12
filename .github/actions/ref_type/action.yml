@@ -16,4 +16,4 @@ runs:
       - name: Parse
         id: parse
         shell: bash
-        run: python parse_ref.py ${{ github.ref }} >> $GITHUB_OUTPUT
+        run: python ${{ github.action_path }}/parse_ref.py ${{ github.ref }} >> $GITHUB_OUTPUT
