@@ -212,7 +212,6 @@ pub enum FramePushErrors {
     TimestampUnexpected,
 }
 
-
 /// Describes the color format of SER frames
 #[binrw]
 #[allow(non_camel_case_types)]
@@ -284,8 +283,8 @@ impl Ser {
         )
     }
 
-    /// SER files include timestamps for each frame, but only if the `datetime`
-    /// field is valid.
+    /// SER files include timestamps for each frame only if the `datetime` field
+    /// is valid.
     pub fn has_frame_timestamps(&self) -> bool {
         self.datetime.is_valid()
     }
@@ -346,6 +345,8 @@ impl<'a> FramesMut<'a> {
     ///
     /// Frame [Timestamp]s MUST be specified if the SER's datetime is set.
     /// Otherwise, they MAY NOT be specified.
+    /// 
+    /// Frame timestamps are in UTC
     pub fn try_push(
         &mut self,
         frame: Frame,

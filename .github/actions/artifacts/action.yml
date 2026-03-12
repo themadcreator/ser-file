@@ -1,56 +1,69 @@
 name: Upload Artifacts
-description: Upload Crate Examples as Artifacts
+description: Compress files and upload as an artifact
 inputs:
   name:
-    description: Name of the artifact
+    description: Name of the output artifact
     required: true
-  target:
-    description: Cargo build target
+  files:
+    description: Glob patterns of files, relative to base_dir
     required: true
-  file_regex:
-    description: Regular expression to match artifact files in the build directory
+  files_cwd:
+    description: Glob patterns of files, relative to cwd 
     required: true
-  artifacts:
-    description: Temporary artifacts path
-    required: true
+  base_dir:
+    description: Base directory, whose structure will be stripped from the files list
+    default: '.'
+  out_dir:
+    description: Temporary output directory for artifacts
     default: 'target/artifacts'
   compress:
     description: Specify 'zip' or 'tgz' to compress artifacts into single file
+    default: ''
 runs:
   using: composite
   steps:
       - shell: bash
         run: |
-          mkdir -p ${{ inputs.artifacts }}
-          OUTDIR=$(realpath ${{ inputs.artifacts }})
+          # Enable globstar
+          shopt -s globstar
+
+          # Prepare output path
+          mkdir -p ${{ inputs.out_dir }}
+          OUTDIR=$(realpath ${{ inputs.out_dir }})
 
           echo "Collect built artifact into $OUTDIR"
-          pushd target/${{ inputs.target }}/release
-          find . -type f -regextype posix-extended -regex '${{ inputs.file_regex }}' -exec cp {} $OUTDIR/. \;
+
+          pushd ${{ base_dir }}
+          FILE_LIST="${{ inputs.files }}"
+          for file in $FILE_LIST; do
+            cp --parents $file $OUTDIR/.
+          done
           popd
 
-          if [ -e LICENSE ]; then
-            echo "Collect LICENSE"
-            cp LICENSE $OUTDIR/.
-          fi
-
-          echo "ARTIFACT_PATH=${{ inputs.artifacts }}/*" >> $GITHUB_ENV 
+          FILE_LIST="${{ inputs.files_cwd }}"
+          for file in $FILE_LIST; do
+            cp --parents $file $OUTDIR/.
+          done
+ 
+          echo "ARTIFACT_PATH=${{ inputs.out_dir }}/*" >> $GITHUB_ENV 
         
-      - shell: bash
+      - name: Archive zip
+        shell: bash
         if: ${{ inputs.compress == 'zip' }}
         run: |
-          pushd ${{ inputs.artifacts }}
+          pushd ${{ inputs.out_dir }}
           zip -r ${{ inputs.name }}.zip ./*
           popd
-          echo "ARTIFACT_PATH=${{ inputs.artifacts }}/${{ inputs.name }}.zip" >> $GITHUB_ENV 
+          echo "ARTIFACT_PATH=${{ inputs.out_dir }}/${{ inputs.name }}.zip" >> $GITHUB_ENV 
         
-      - shell: bash
+      - name: Archive tgz
+        shell: bash
         if: ${{ inputs.compress == 'tgz' }}
         run: |
-          pushd ${{ inputs.artifacts }}
+          pushd ${{ inputs.out_dir }}
           tar -czvf ${{ inputs.name }}.tgz ./*
           popd
-          echo "ARTIFACT_PATH=${{ inputs.artifacts }}/${{ inputs.name }}.tgz" >> $GITHUB_ENV 
+          echo "ARTIFACT_PATH=${{ inputs.out_dir }}/${{ inputs.name }}.tgz" >> $GITHUB_ENV 
         
       - uses: actions/upload-artifact@v4
         with:

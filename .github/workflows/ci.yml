@@ -1,0 +1,144 @@
+name: Build
+
+env:
+  DIST_NAME: 'ser-file'
+  ARTIFACTS_NIX: '-
+    examples/ser
+    libser_file.rlib
+  ARTIFACTS_WIN: '-
+    examples/ser.exe
+    libser_file.rlib
+  ARTIFACTS_COMMON: '-
+    LICENSE
+
+
+on:
+  push:
+  pull_request:
+
+
+jobs:
+  parse_ref:
+    runs-on: ubuntu-latest
+    outputs:
+      ref_type: ${{ steps.parse.outputs.ref_type }}
+    steps:
+      - id: parse
+        uses: ./.github/actions/ref_type/
+
+
+  test:
+    runs-on: ubuntu-latest
+    
+    strategy:
+      matrix:
+        target:
+          - '--all-targets'
+          - '--all-features --all-targets'
+          - '--doc'
+
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions-rust-lang/setup-rust-toolchain@v1
+      - run: cargo test ${{ matrix.target }}
+
+
+  build:
+    needs:
+      - parse_ref
+      - test
+
+    if: |-
+      ${{
+        jobs.parse_ref.outputs.ref_type == "tag-semver-release" ||
+        jobs.parse_ref.outputs.ref_type == "tag-semver-pre-release"
+      }}
+
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        include:
+          - target: x86_64-unknown-linux-gnu
+            convention: nix
+          - target: aarch64-unknown-linux-gnu
+            convention: nix
+          - target: x86_64-apple-darwin
+            convention: nix
+          - target: aarch64-apple-darwin
+            convention: nix
+          - target: x86_64-pc-windows-msvc
+            convention: win
+
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Build Nix
+        if: ${{ matrix.convention == 'nix' }}
+        uses: zijiren233/cargo-cross@v1
+        with:
+          command: build --all-targets
+          targets: ${{ matrix.target }}
+
+      - name: Build Win
+        if: ${{ matrix.convention == 'win' }}
+        uses: ./.github/actions/xwin/
+        with:
+          command: build --all-targets
+          target: ${{ matrix.target }}
+
+      - name: Upload Artifacts
+        uses: ./.github/actions/artifacts/
+        with:
+          name: ${{ env.DIST_NAME }}-${{ github.ref_name }}-${{ matrix.target }}
+          base_dir: target/${{ matrix.target }}/release
+          files: ${{ case( matrix.convention == 'win', env.ARTIFACTS_WIN, env.ARTIFACTS_NIX ) }}
+          files_cwd: ${{ env.ARTIFACTS_COMMON }}
+          compress: ${{ case( matrix.convention == 'win', 'zip', 'tgz' )}}
+
+
+  release:
+    needs:
+      - parse_ref
+      - build
+    
+    if: ${{ jobs.parse_ref.outputs.ref_type == "tag-semver-release" }}
+
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write
+
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/download-artifact@v4
+        with:
+          path: dist/
+      - uses: softprops/action-gh-release@v2
+        with:
+          prerelease: ${{ needs.check-prerelease.outputs.is_prerelease == 'true' }}
+          files: dist/**/*
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+
+  publish:
+    needs:
+      - parse_ref
+      - build
+
+    runs-on: ubuntu-latest
+
+    env:
+      PUBLISH_ARGS: |-
+        ${{ case(
+          jobs.parse_ref.outputs.ref_type == "tag-semver-release", "",
+          "--dry-run"
+        ) }}
+
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions-rust-lang/setup-rust-toolchain@v1
+      - run: cargo publish $PUBLISH_ARGS
+        env:
+          CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN }}

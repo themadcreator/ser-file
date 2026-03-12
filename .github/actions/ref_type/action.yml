@@ -1,0 +1,21 @@
+name: Parses the github ref to determine its type
+description: Parses the input string and determines if its a semver
+outputs:
+  ref_type:
+    description: |-
+      Parses the ref and provides a type string
+
+      "refs/pull/12/merge"     -> "pr"
+      "refs/heads/main"        -> "branch"
+      "refs/tags/hello"        -> "tag"
+      "refs/tags/v0.1.0"       -> "tag-semver-release"
+      "refs/tags/v0.1.0-pre.1" -> "tag-semver-pre-release"
+runs:
+  using: composite
+  steps:
+      - name: Parse
+        id: parse
+        env:
+          REF: ${{ github.ref }}
+        shell: python
+        run: ./parse_ref.py

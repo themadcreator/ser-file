@@ -16,7 +16,7 @@ git commit -m "Bump version ${VER}"
 
 echo "Releasing version ${VER}"
 echo "Press [ENTER] when ready..."
-read  -n 1
+read -n 1
 
 git push
 git tag -a "v${VER}" -m "Release version ${VER}"
