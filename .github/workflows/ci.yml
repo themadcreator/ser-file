@@ -2,13 +2,13 @@ name: Build
 
 env:
   DIST_NAME: 'ser-file'
-  ARTIFACTS_NIX: '-
+  ARTIFACTS_NIX: |-
     examples/ser
     libser_file.rlib
-  ARTIFACTS_WIN: '-
+  ARTIFACTS_WIN: |-
     examples/ser.exe
     libser_file.rlib
-  ARTIFACTS_COMMON: '-
+  ARTIFACTS_COMMON: |-
     LICENSE
 
 
