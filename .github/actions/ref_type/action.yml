@@ -17,5 +17,4 @@ runs:
         id: parse
         env:
           REF: ${{ github.ref }}
-        shell: python
-        run: ./parse_ref.py
+        shell: python parse_ref.py
