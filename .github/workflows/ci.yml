@@ -50,8 +50,8 @@ jobs:
 
     if: |-
       ${{
-        jobs.parse_ref.outputs.ref_type == "tag-semver-release" ||
-        jobs.parse_ref.outputs.ref_type == "tag-semver-pre-release"
+        jobs.parse_ref.outputs.ref_type == 'tag-semver-release' ||
+        jobs.parse_ref.outputs.ref_type == 'tag-semver-pre-release'
       }}
 
     runs-on: ubuntu-latest
@@ -102,7 +102,7 @@ jobs:
       - parse_ref
       - build
     
-    if: ${{ jobs.parse_ref.outputs.ref_type == "tag-semver-release" }}
+    if: ${{ jobs.parse_ref.outputs.ref_type == 'tag-semver-release' }}
 
     runs-on: ubuntu-latest
 
