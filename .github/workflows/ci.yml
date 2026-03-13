@@ -109,7 +109,11 @@ jobs:
       - parse_ref
       - build
     
-    if: ${{ needs.parse_ref.outputs.ref_type == 'tag-semver-release' }}
+    if: |-
+      ${{
+        needs.parse_ref.outputs.ref_type == 'tag-semver-release' ||
+        needs.parse_ref.outputs.ref_type == 'tag-semver-pre-release'
+      }}
 
     permissions:
       contents: write
