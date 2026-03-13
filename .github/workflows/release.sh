@@ -22,7 +22,7 @@ esac
 cargo set-version --bump $bump
 ver=$(cargo metadata --no-deps --format-version=1 | jq -r '.packages[0].version')
 
-echo "Releasing version ${ver}"
+echo -e "\n\nReleasing version ${ver}\n\n"
 
 git add Cargo.toml Cargo.lock
 git commit -m "Bump version ${ver}"
