@@ -24,7 +24,7 @@ jobs:
       matrix:
         target:
           - '--all-targets'
-          - '--all-features --all-targets'
+          - '--all-targets --all-features'
           - '--doc'
 
     runs-on: ubuntu-latest

@@ -61,7 +61,7 @@ struct ExportCommand {
     ///
     /// Output frames will be named `[ser_file_basename]_000.[ext]`, `[ser_file_basename]_001.[ext]`, ...
     ///
-    /// See: https://crates.io/crates/image
+    /// See: <https://crates.io/crates/image>
     #[arg(long, short, default_value = "png")]
     ext: String,
 

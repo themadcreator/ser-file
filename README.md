@@ -4,10 +4,9 @@
 
 Read, write, export, create SER files.
 
-This crate includes a lib and a cli.
+This crate includes a lib and a cli (with the `"cli"` feature).
 
-To use the cli, build this crate with `--examples` or download a pre-built
-artifact from the repo.
+Pre-built binary and library artifacts are available at [repo releases](https://github.com/themadcreator/ser-file/releases).
 
 #### Example: Export SER frames as PNGs
 
@@ -63,4 +62,53 @@ ser.write(&mut out)?;
 
 # Ok(())
 # }
+```
+
+#### Example: Use the cli
+
+```text
+> cargo run --features cli --bin ser -- --help
+Read, write, export, create SER files
+
+Usage: ser <COMMAND>
+
+Commands:
+  info      Prints out information about a SER file
+  create    Creates a new SER file from a set of input images
+  export    Exports the frames from this SER file
+  validate  Validates this library by parsing and writing to memory and comparing the bytes
+  help      Print this message or the help of the given subcommand(s)
+
+Options:
+  -h, --help     Print help
+  -V, --version  Print version
+```
+
+```text
+> cargo run --features cli --bin ser -- info --in example.ser
+SER File example.ser
+Metadata:
+        Observer:   'Observer                                '
+        Instrument: 'ZWO ASI385MC                            '
+        Telescope:  'Telescope                               '
+Datetime:
+        Local:  2026-03-08 15:10:11.555915
+        UTC:    2026-03-08 22:10:11.555915
+Frame Format:
+        Color:  BAYER_BGGR
+        Depth:  U16(16)
+        Width:  1936
+        Height: 1096
+Frame Count: 10
+Frame Timestamps:
+        0:  2026-03-08 22:10:11.518220
+        1:  2026-03-08 22:10:11.537575
+        2:  2026-03-08 22:10:11.557111
+        3:  2026-03-08 22:10:11.576502
+        4:  2026-03-08 22:10:11.596097
+        5:  2026-03-08 22:10:11.615425
+        6:  2026-03-08 22:10:11.634807
+        7:  2026-03-08 22:10:11.654251
+        8:  2026-03-08 22:10:11.673783
+        9:  2026-03-08 22:10:11.693369
 ```

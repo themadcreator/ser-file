@@ -1,0 +1,14 @@
+{
+    "dist_name": "ser-file",
+    "artifacts_nix": [
+        "examples/ser",
+        "libser_file.rlib"
+    ],
+    "artifacts_win": [
+        "examples/ser.exe",
+        "libser_file.rlib"
+    ],
+    "artifacts_common": [
+        "LICENSE"
+    ]
+}
