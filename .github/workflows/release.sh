@@ -7,7 +7,7 @@ fi
 
 ver=$(cargo metadata --no-deps --format-version=1 | jq -r '.packages[0].version')
 
-echo "\n\nCurrent version is $ver\n\n"
+echo -e "\n\nCurrent version is $ver\n\n"
 
 read -p "What to bump? (patch/rc) " bump
 cargo set-version --dry-run --bump $bump
