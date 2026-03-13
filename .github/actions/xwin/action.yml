@@ -20,9 +20,9 @@ runs:
         with:
           toolchain: stable
           target: ${{ inputs.target }}
-      - run: cargo install cargo-xwin
-        shell: bash
-      - run: cargo xwin cache xwin
-        shell: bash
-      - run: cargo xwin ${{ inputs.command }} --${{ inputs.profile }} --target ${{ inputs.target }}
-        shell: bash
+      - shell: bash
+        run: cargo install cargo-xwin
+      - shell: bash
+        run: cargo xwin cache xwin
+      - shell: bash
+        run: cargo xwin ${{ inputs.command }} --${{ inputs.profile }} --target ${{ inputs.target }}
