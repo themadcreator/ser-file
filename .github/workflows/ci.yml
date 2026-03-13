@@ -91,7 +91,7 @@ jobs:
       
       - name: Read artifact config
         id: artifacts
-        run: jq -r 'to_entries[] | "\(.key)=\(.value | if type == "array" then join(" ") else . end)"' artifacts.json >> $GITHUB_OUTPUT
+        run: jq -r 'to_entries[] | "\(.key)=\(.value | if type == "array" then join(" ") else . end)"' ${GITHUB_WORKSPACE}/.github/workflows/artifacts.json >> $GITHUB_OUTPUT
 
       - name: Upload Artifacts
         uses: ./.github/actions/artifacts/
