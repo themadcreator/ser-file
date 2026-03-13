@@ -345,7 +345,7 @@ impl<'a> FramesMut<'a> {
     ///
     /// Frame [Timestamp]s MUST be specified if the SER's datetime is set.
     /// Otherwise, they MAY NOT be specified.
-    /// 
+    ///
     /// Frame timestamps are in UTC
     pub fn try_push(
         &mut self,

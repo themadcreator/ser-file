@@ -159,7 +159,9 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                 println!("Writing {:?}", &filename);
                 img.save(&filename)?;
 
-                if let Some(ts) = timestamp && cmd.timestamp {
+                if let Some(ts) = timestamp
+                    && cmd.timestamp
+                {
                     let file = File::open(&filename)?;
                     let times = FileTimes::new().set_modified(ts.try_into()?);
                     file.set_times(times)?;

@@ -6,7 +6,7 @@ on:
 
 jobs:
   parse_ref:
-    name: Parse ref
+    name: Parse git ref
 
     outputs:
       ref_type: ${{ steps.parse.outputs.ref_type }}
@@ -18,7 +18,7 @@ jobs:
         uses: ./.github/actions/ref_type/
 
   fmt-check:
-    name: Check format
+    name: Check Format
 
     runs-on: ubuntu-latest
     steps:

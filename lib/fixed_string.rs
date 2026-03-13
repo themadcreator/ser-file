@@ -1,7 +1,7 @@
 use binrw::{BinRead, BinResult, BinWrite};
 
 /// A fixed-width array of bytes representing an ASCII string.
-/// 
+///
 /// The bytes default to all zeros, but this string may not necessarily
 /// terminate with a `'\0'` if all bytes are used.
 pub struct FixedString<const N: usize>([u8; N]);

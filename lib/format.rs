@@ -28,10 +28,10 @@ pub enum Pixels {
 pub struct Frame((u32, u32), Pixels);
 
 /// The format defining all images in a SER file.
-/// 
+///
 /// Only one format per SER file is supported. All images must have the same
 /// width, height, bytes per pixel, etc.
-/// 
+///
 /// Once a format is defined, SER frames may be converted to/from
 /// [image::DynamicImage]s. Furthermore, a [FrameFormat] may be computed from an
 /// existing [DynamicImage] using [TryFrom].
@@ -52,7 +52,13 @@ enum PixelChannels {
 }
 
 impl FrameFormat {
-    pub fn new(color: ColorId, depth: PixelDepth, endian: PixelEndian, width: u32, height: u32) -> Self {
+    pub fn new(
+        color: ColorId,
+        depth: PixelDepth,
+        endian: PixelEndian,
+        width: u32,
+        height: u32,
+    ) -> Self {
         Self {
             color,
             depth,
