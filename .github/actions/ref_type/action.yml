@@ -17,3 +17,6 @@ runs:
         id: parse
         shell: bash
         run: python ${{ github.action_path }}/parse_ref.py ${{ github.ref }} >> "$GITHUB_OUTPUT"
+      - shell: bash
+        run: |-
+          echo "checking output that is ${{ steps.parse.outputs.ref_type }}"
