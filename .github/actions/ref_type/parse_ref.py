@@ -1,7 +1,5 @@
 import re
-import os
 import sys
-
 
 def get_ref_type(ref):
     match = re.search(r"^refs/pull/([0-9]+)/merge$", ref)
@@ -25,29 +23,5 @@ def get_ref_type(ref):
 
     return "unknown"
 
-
 if __name__ == "__main__":
-    ref_type = get_ref_type(sys.argv[1])
-    print("ref_type={}\n".format(ref_type))
-    print("ref_type={}\n".format(ref_type), file=sys.stderr)
-
-
-# # PR
-# ref = "refs/pull/12/merge"
-
-# # Branch
-# ref = "refs/heads/[branch]"
-
-# # Tag 
-# ref = "refs/tags/v[semver]"
-
-# semver = {
-#     "major": match.group(1),
-#     "minor": match.group(2),
-#     "patch": match.group(3),
-#     "pre-release": match.group(4),
-#     "build-metadata": match.group(5),
-# }:
-# ref = "refs/pull/12/merge"
-# ref = "refs/heads/[branch]"
-# ref = "refs/tags/v[semver]"
+    print(get_ref_type(sys.argv[1]))

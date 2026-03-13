@@ -1,7 +1,8 @@
-name: Parses the github ref to determine its type
+name: Parses github.ref
 description: Parses the input string and determines if its a semver
 outputs:
   ref_type:
+    value: ${{ steps.parse.outputs.ref_type }}
     description: |-
       Parses the ref and provides a type string
 
@@ -16,7 +17,4 @@ runs:
       - name: Parse
         id: parse
         shell: bash
-        run: python ${{ github.action_path }}/parse_ref.py ${{ github.ref }} >> "$GITHUB_OUTPUT"
-      - shell: bash
-        run: |-
-          echo "checking output that is ${{ steps.parse.outputs.ref_type }}"
+        run: echo "ref_type=$(python ${{ github.action_path }}/parse_ref.py ${{ github.ref }})" >> $GITHUB_OUTPUT

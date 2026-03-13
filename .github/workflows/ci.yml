@@ -1,7 +1,7 @@
 name: Build
 
 env:
-  DIST_NAME: 'ser-file'
+  DIST_NAME: ser-file
   ARTIFACTS_NIX: |-
     examples/ser
     libser_file.rlib
