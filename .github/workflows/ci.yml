@@ -28,8 +28,6 @@ jobs:
 
   test:
     name: Test Suite
-
-    needs: fmt-check
     
     strategy:
       matrix:
@@ -50,6 +48,7 @@ jobs:
     needs:
       - parse_ref
       - test
+      - fmt-check
 
     if: |-
       ${{
