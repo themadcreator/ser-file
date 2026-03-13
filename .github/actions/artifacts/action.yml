@@ -33,7 +33,7 @@ runs:
 
           echo "Collect built artifact into $OUTDIR"
 
-          pushd ${{ base_dir }}
+          pushd ${{ inputs.base_dir }}
           FILE_LIST="${{ inputs.files }}"
           for file in $FILE_LIST; do
             cp --parents $file $OUTDIR/.
