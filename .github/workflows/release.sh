@@ -15,7 +15,7 @@ cargo set-version --dry-run --bump $bump
 echo ""
 read -p "Proceed with this change and release? (y/n) " yn
 case $yn in
-    [Yy]* ) echo "Confirmed."; break;;
+    [Yy]* ) echo "Confirmed.";;
     * ) echo "No confirmation. Exiting."; exit;;
 esac
 
