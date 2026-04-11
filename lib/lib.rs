@@ -113,10 +113,6 @@
 //!         9:  2026-03-08 22:10:11.693369
 //! ```
 //! 
-//! 
-//! 
-
-#![doc = include_str!("../README.md")]
 
 mod fixed_string;
 mod format;
