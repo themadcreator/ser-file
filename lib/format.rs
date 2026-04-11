@@ -199,15 +199,15 @@ impl BinRead for Frame {
             (PixelChannels::Luma, PixelDepth::U8(_)) => {
                 Pixels::Luma8(<Vec<u8>>::read_options(reader, endian, vec_args)?)
             }
-            (PixelChannels::Luma, PixelDepth::U16(_)) => Pixels::Luma16(
-                <Vec<u16>>::read_options(reader, endian, vec_args)?,
-            ),
+            (PixelChannels::Luma, PixelDepth::U16(_)) => {
+                Pixels::Luma16(<Vec<u16>>::read_options(reader, endian, vec_args)?)
+            }
             (PixelChannels::Rgb, PixelDepth::U8(_)) => {
                 Pixels::Rgb8(<Vec<u8>>::read_options(reader, endian, vec_args)?)
             }
-            (PixelChannels::Rgb, PixelDepth::U16(_)) => Pixels::Rgb16(
-                <Vec<u16>>::read_options(reader, endian, vec_args)?,
-            ),
+            (PixelChannels::Rgb, PixelDepth::U16(_)) => {
+                Pixels::Rgb16(<Vec<u16>>::read_options(reader, endian, vec_args)?)
+            }
         };
 
         Ok(Frame((args.width, args.height), pixels))

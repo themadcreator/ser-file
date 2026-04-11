@@ -3,27 +3,27 @@
 //! [![Crates.io](https://img.shields.io/crates/v/ser-file.svg)](https://crates.io/crates/ser-file)
 //! [![Docs.rs](https://docs.rs/ser-file/badge.svg)](https://docs.rs/ser-file)
 //! [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-//! 
+//!
 //! Read, write, export, create SER files.
-//! 
+//!
 //! This crate includes a lib and a cli (with the `"cli"` feature).
-//! 
+//!
 //! Pre-built binary and library artifacts are available at [repo releases](https://github.com/themadcreator/ser-file/releases).
-//! 
+//!
 //! #### Example: Export SER frames as PNGs
-//! 
+//!
 //! ```rust,no_run
 //! use ser_file::Ser;
 //! use binrw::BinRead;
-//! 
+//!
 //! use image::DynamicImage;
 //! use std::fs::File;
 //! # fn example() -> Result<(), Box<dyn std::error::Error>> {
-//! 
+//!
 //! // Read a SER file
 //! let mut file = File::open("example.ser")?;
 //! let ser = Ser::read(&mut file)?;
-//! 
+//!
 //! // Save each frame as a PNG
 //! for (i, (frame, _timestamp)) in ser.into_iter().enumerate() {
 //!     let img: DynamicImage = frame.try_into()?;
@@ -32,58 +32,58 @@
 //! # Ok(())
 //! # }
 //! ```
-//! 
+//!
 //! #### Example: Create a SER containing a single PNG
-//! 
+//!
 //! ```rust,no_run
 //! use ser_file::{Ser, FrameFormat};
 //! use binrw::BinWrite;
-//! 
+//!
 //! use image;
 //! use std::{fs::File, io::BufWriter};
 //! # fn example() -> Result<(), Box<dyn std::error::Error>> {
-//! 
+//!
 //! // Read a PNG
 //! let img = image::open("example.png")?;
-//! 
+//!
 //! // Create a format matching the image
 //! let format = FrameFormat::try_from(&img)?;
-//! 
+//!
 //! // Create a new SER document
 //! let mut ser = Ser::with_format(format);
-//! 
+//!
 //! // Add image as a frame
 //! let mut frames = ser.frames_mut();
 //! let frame = frames.format().try_into_frame(img)?;
 //! frames.try_push(frame, None)?;
-//! 
+//!
 //! // Write
 //! let mut out = BufWriter::new(File::create("output.ser")?);
 //! ser.write(&mut out)?;
 //! # Ok(())
 //! # }
 //! ```
-//! 
+//!
 //! #### Example: Use the cli
-//! 
+//!
 //! ```text
 //! > cargo run --features cli --bin ser -- --help
 //! Read, write, export, create SER files
-//! 
+//!
 //! Usage: ser <COMMAND>
-//! 
+//!
 //! Commands:
 //!   info      Prints out information about a SER file
 //!   create    Creates a new SER file from a set of input images
 //!   export    Exports the frames from this SER file
 //!   validate  Validates this library by parsing and writing to memory and comparing the bytes
 //!   help      Print this message or the help of the given subcommand(s)
-//! 
+//!
 //! Options:
 //!   -h, --help     Print help
 //!   -V, --version  Print version
 //! ```
-//! 
+//!
 //! ```text
 //! > cargo run --features cli --bin ser -- info --in example.ser
 //! SER File example.ser
@@ -112,7 +112,7 @@
 //!         8:  2026-03-08 22:10:11.673783
 //!         9:  2026-03-08 22:10:11.693369
 //! ```
-//! 
+//!
 
 mod fixed_string;
 mod format;
