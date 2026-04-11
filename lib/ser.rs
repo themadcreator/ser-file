@@ -53,6 +53,8 @@ pub struct Ser {
     ///
     /// Content: 0 (FALSE) for big-endian byte order in 16 bit image data
     /// 1 (TRUE) for little-endian byte order in 16 bit image data
+    ///
+    /// NOTE: See comment on [PixelEndian]
     little_endian: PixelEndian,
 
     /// 5_ImageWidth
@@ -161,6 +163,7 @@ pub struct Ser {
             image_height as _,
         )
     })]
+    #[bw(args_raw = self.frame_format())]
     image_data: Vec<Frame>,
 
     /// Trailer
@@ -242,13 +245,33 @@ pub enum ColorId {
 }
 
 /// Describes the endianness of pixel data in SER frames
+///
+/// Developers Note
+/// ===================
+///
+/// Astonishingly, by convention most SER implementations invert this flag's
+/// value from the official specification.
+///
+/// For example, Siril's [source
+/// code](https://gitlab.com/free-astro/siril/-/blob/master/src/io/ser.h#L73)
+/// contains the following comment:
+///
+/// > "For an unknown reason, several of the first programs to support SER
+/// > disrespect the specification regarding the endianness flag. The
+/// > specification states that a boolean value is used for the LittleEndian
+/// > header, and they use it as a BigEndian header, with 0 for little-endian
+/// > and 1 for big-endian. Consequently, to not break compatibility with these
+/// > first implementations, later programs, like Siril and GoQat, have also
+/// > decided to implement this header in opposite meaning to the specification."
+///
+/// Other rust crates seem to follow this convention, and this crate does as
+/// well.
 #[binrw]
-#[allow(non_camel_case_types)]
-#[derive(Clone)]
+#[derive(Clone, Debug, PartialEq)]
 pub enum PixelEndian {
-    #[brw(magic = 0i32)]
+    #[brw(magic = 1i32)] // see above
     Big,
-    #[brw(magic = 1i32)]
+    #[brw(magic = 0i32)] // see above
     Little,
 }
 
@@ -409,6 +432,21 @@ impl<'a> DatesMut<'a> {
     }
 }
 
+impl Default for PixelEndian {
+    fn default() -> Self {
+        PixelEndian::Little
+    }
+}
+
+impl From<&PixelEndian> for binrw::Endian {
+    fn from(value: &PixelEndian) -> Self {
+        match value {
+            PixelEndian::Big => binrw::Endian::Big,
+            PixelEndian::Little => binrw::Endian::Little,
+        }
+    }
+}
+
 impl std::error::Error for FramePushErrors {}
 
 impl Display for FramePushErrors {
@@ -434,16 +472,6 @@ impl Display for DateErrors {
         match self {
             DateErrors::InvalidDatetime => f.write_str("Cannot set datetime to invalid timestamp. To clear the datetimes, use the `.clear()` method."),
             DateErrors::IncorrectTimestamps => f.write_str("Frame timestamps do not match the number of the frames."),
-        }
-    }
-}
-
-impl PixelEndian {
-    pub fn host_endian() -> Self {
-        if cfg!(target_endian = "big") {
-            PixelEndian::Big
-        } else {
-            PixelEndian::Little
         }
     }
 }

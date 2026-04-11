@@ -15,6 +15,10 @@ pub enum PixelDepth {
 }
 
 /// Container for different pixel formats
+///
+/// [u16] values are in native endianness for easy interoperability with the
+/// [image] crate. They are converted from/to the SER's specified endianness on
+/// read/write.
 #[derive(Clone)]
 pub enum Pixels {
     Rgb8(Vec<u8>),
@@ -68,6 +72,8 @@ impl FrameFormat {
         }
     }
 
+    /// Returns the total number of [u8] or [u16] pixel samples. (width * height
+    /// * channel_count)
     pub fn raw_len(&self) -> usize {
         let channels: PixelChannels = (&self.color).into();
         channels.len() * self.width as usize * self.height as usize
@@ -121,28 +127,28 @@ impl TryFrom<&DynamicImage> for FrameFormat {
             DynamicImage::ImageRgb8(_) => Ok(FrameFormat::new(
                 ColorId::RGB,
                 PixelDepth::U8(8),
-                PixelEndian::host_endian(),
+                PixelEndian::default(),
                 width,
                 height,
             )),
             DynamicImage::ImageRgb16(_) => Ok(FrameFormat::new(
                 ColorId::RGB,
                 PixelDepth::U16(16),
-                PixelEndian::host_endian(),
+                PixelEndian::default(),
                 width,
                 height,
             )),
             DynamicImage::ImageLuma8(_) => Ok(FrameFormat::new(
                 ColorId::MONO,
                 PixelDepth::U8(8),
-                PixelEndian::host_endian(),
+                PixelEndian::default(),
                 width,
                 height,
             )),
             DynamicImage::ImageLuma16(_) => Ok(FrameFormat::new(
                 ColorId::MONO,
                 PixelDepth::U16(16),
-                PixelEndian::host_endian(),
+                PixelEndian::default(),
                 width,
                 height,
             )),
@@ -181,26 +187,27 @@ impl BinRead for Frame {
 
     fn read_options<R: std::io::Read + std::io::Seek>(
         reader: &mut R,
-        endian: binrw::Endian,
+        _endian: binrw::Endian,
         args: Self::Args<'_>,
     ) -> BinResult<Self> {
-        let channels: PixelChannels = (&args.color).into();
+        let channels: PixelChannels = args.color().into();
         let vec_args = VecArgs::builder()
             .count(channels.len() * args.width as usize * args.height as usize)
             .finalize();
-        let pixels = match (channels, args.depth) {
+        let endian = args.endian().into();
+        let pixels = match (channels, args.depth()) {
             (PixelChannels::Luma, PixelDepth::U8(_)) => {
                 Pixels::Luma8(<Vec<u8>>::read_options(reader, endian, vec_args)?)
             }
-            (PixelChannels::Luma, PixelDepth::U16(_)) => {
-                Pixels::Luma16(<Vec<u16>>::read_options(reader, endian, vec_args)?)
-            }
+            (PixelChannels::Luma, PixelDepth::U16(_)) => Pixels::Luma16(
+                <Vec<u16>>::read_options(reader, endian, vec_args)?,
+            ),
             (PixelChannels::Rgb, PixelDepth::U8(_)) => {
                 Pixels::Rgb8(<Vec<u8>>::read_options(reader, endian, vec_args)?)
             }
-            (PixelChannels::Rgb, PixelDepth::U16(_)) => {
-                Pixels::Rgb16(<Vec<u16>>::read_options(reader, endian, vec_args)?)
-            }
+            (PixelChannels::Rgb, PixelDepth::U16(_)) => Pixels::Rgb16(
+                <Vec<u16>>::read_options(reader, endian, vec_args)?,
+            ),
         };
 
         Ok(Frame((args.width, args.height), pixels))
@@ -208,15 +215,16 @@ impl BinRead for Frame {
 }
 
 impl BinWrite for Frame {
-    type Args<'a> = ();
+    type Args<'a> = FrameFormat;
 
     fn write_options<W: std::io::Write + std::io::Seek>(
         &self,
         writer: &mut W,
-        endian: binrw::Endian,
-        _args: Self::Args<'_>,
+        _endian: binrw::Endian,
+        args: Self::Args<'_>,
     ) -> BinResult<()> {
         let Frame(_, pixels) = self;
+        let endian = args.endian().into();
         match pixels {
             Pixels::Rgb8(p) => p.write_options(writer, endian, ()),
             Pixels::Rgb16(p) => p.write_options(writer, endian, ()),

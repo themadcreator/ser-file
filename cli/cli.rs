@@ -100,6 +100,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             println!("Frame Format:");
             println!("\tColor:  {:?}", format.color());
             println!("\tDepth:  {:?}", format.depth());
+            println!("\tEndian: {:?}", format.endian());
             println!("\tWidth:  {}", format.width());
             println!("\tHeight: {}", format.height());
 
